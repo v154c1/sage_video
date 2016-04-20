@@ -23,8 +23,8 @@ def compute(cfg):
 
     video_data = cfg['video']
 
-    W = video_data["streams"][0]['coded_width']
-    H = video_data["streams"][0]['coded_height']
+    W = video_data["streams"][0]['width']
+    H = video_data["streams"][0]['height']
 
     # find upscaled resolution
     if (total_x / W) < (total_y / H):
