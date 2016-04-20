@@ -1,0 +1,32 @@
+{
+    "total_x": 9600, 
+    "total_y": 4320, 
+    "stripes_x": 5, 
+    "stripes_y": 1,
+
+    "renderers": {
+	    "0_0": {
+	        "dir": "/home/sage/projects/sage_video/configs", 
+	        "address": "sage@195.113.232.41"
+	    },
+	    "1_0": {
+	        "dir": "/home/sage/projects/sage_video/configs", 
+	        "address": "sage@195.113.232.42"
+	    },
+	    "2_0": {
+	        "dir": "/home/sage/projects/sage_video/configs", 
+	        "address": "sage@195.113.232.43"
+	    },
+	    "3_0": {
+	        "dir": "/home/sage/projects/sage_video/configs", 
+	        "address": "sage@195.113.232.44"
+	    },
+	    "4_0": {
+	        "dir": "/home/sage/projects/sage_video/configs", 
+	        "address": "sage@195.113.232.45"
+	    }
+    },
+    "server": {
+    	"dir": "/home/sage/projects/sage_video/configs"
+    }
+}

@@ -1,0 +1,89 @@
+<app>
+
+<variable name="file" description="Video file"></variable>
+<variable name="address" description="target address">239.0.0.1</variable>
+<variable name="port" description="target port">20103</variable>
+<variable name="display" description="display"></variable>
+<variable name="webdir" description="Directory with web"></variable>
+<variable name="webport" description="Web port">9080</variable>
+<variable name="websize" description="Web port">320x240</variable>
+<variable name="webfps" description="Web fps">10</variable>
+
+<node class="rawavsource" name="video">
+	<parameter name="filename">@file</parameter>
+	<parameter name="max_audio">0</parameter>
+</node>
+
+<node class="onepc_protocol_coordinator" name="sync">
+	
+</node>
+
+<node class="glx_window" name="glx">
+<parameter name="display">@display</parameter>
+</node>
+
+<node class="event_info" name="info"/>
+
+<node class="osc_sender" name="osc_out">
+		<parameter name="address">@address</parameter>
+		<parameter name="port">@port</parameter>
+</node>
+
+<node class="webserver" name="webserver">
+<parameter name="port">@webport</parameter>
+</node>
+
+<node class="web_directory" name="web">
+<parameter name="dir">@webdir</parameter>
+<parameter name="path">/</parameter>
+</node>
+
+<node class="web_image" name="img">
+<parameter name="path">/image.jpg</parameter>
+</node>
+
+<node class="web_control" name="control">
+	<parameter name="path">/control</parameter>
+</node>
+
+
+<node class="scale" name="resize">
+<parameter name="resolution">@websize</parameter>
+</node>
+
+<node class="jpeg_encoder" name="jpeg">
+</node>
+
+<node class="fix_fps" name="fps">
+<parameter name="fps">@webfps</parameter>
+</node>
+
+<node class="dup" name="dup"/>
+
+<node class="playback_controller" name="playback">
+</node>
+<!-- 
+<node class="jack_output" name="jack">
+<parameter name="connect_to">system</parameter>
+
+</node>
+ -->
+ 
+<event>
+route(sync:perform)->osc_out:/perform;
+route(control:pause)->playback:pause;
+route(pass(FALSE))->playback:pause;
+</event>
+
+<link class="single_blocking" name="input" source="video:0" target="playback:0"/>
+<!-- <link class="single" name="audio" source="video:1" target="jack:0"/>  -->
+<link class="single_blocking" name="playback" source="playback:0" target="sync:0"/>
+
+<link class="single" name="to_dup" source="sync:0" target="dup:0"/>
+<link class="single" name="show" source="dup:-1" target="glx:0"/>
+<link class="single" name="to_fps" source="dup:-1" target="fps:0"/>
+<link class="single" name="to_resize" source="fps:0" target="resize:0"/>
+<link class="single" name="to_jpg" source="resize:0" target="jpeg:0"/>
+<link class="single" name="web" source="jpeg:0" target="img:0"/>
+
+</app>

@@ -1,0 +1,63 @@
+<app>
+
+<variable name="file" description="Video file"></variable>>
+<variable name="port" description="target port">20103</variable>
+<variable name="display" description="display"></variable>
+<variable name="crop" description="">0x0+0+0</variable>
+<variable name="resolution" description="">1920x1080</variable>
+<variable name="pad" description="">@resolution</variable>
+<variable name="halign" description="">center</variable>
+
+<node class="rawavsource" name="video">
+	<parameter name="filename">@file</parameter>
+	<parameter name="fps">-1</parameter>
+
+</node>
+
+<node class="crop" name="crop">
+	<parameter name="geometry">@crop</parameter>
+	
+
+</node>
+
+
+<node class="onepc_protocol_cohort" name="sync">
+	<parameter name="fps_stats">100</parameter>	
+</node>
+
+<node class="pad" name="pad">
+	<parameter name="resolution">@pad</parameter>
+	<parameter name="halign">@halign</parameter>
+</node>
+
+<node class="glx_window" name="glx">
+	<parameter name="display">@display</parameter>
+	<parameter name="resolution">@resolution</parameter>
+</node>
+
+
+<node class="osc_receiver" name="osc_in">
+		<parameter name="port">@port</parameter>
+</node>
+
+<event>
+route(osc_in:/perform)->sync:perform;
+route(osc_in:*)->info:*;
+</event>
+
+
+
+<link class="count_limited_blocking" name="input" source="video:0" target="crop:0">
+	<parameter name="count">5</parameter>
+</link>
+<link class="count_limited_blocking" name="cropped" source="crop:0" target="pad:0">
+	<parameter name="count">5</parameter>
+</link>
+<link class="count_limited_blocking" name="padded" source="pad:0" target="sync:0">
+	<parameter name="count">5</parameter>
+</link>
+<link class="single" name="show" source="sync:0" target="glx:0">
+	<parameter name="count">5</parameter>
+</link>
+
+</app>
