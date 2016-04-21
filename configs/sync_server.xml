@@ -29,6 +29,27 @@
 		<parameter name="port">@port</parameter>
 </node>
 
+<node class="osc_sender" name="osc_out1">
+		<parameter name="address">192.168.232.41</parameter>
+		<parameter name="port">@port</parameter>
+</node>
+
+<node class="osc_sender" name="osc_out2">
+		<parameter name="address">192.168.232.42</parameter>
+		<parameter name="port">@port</parameter>
+</node>
+<node class="osc_sender" name="osc_out3">
+		<parameter name="address">192.168.232.43</parameter>
+		<parameter name="port">@port</parameter>
+</node>
+<node class="osc_sender" name="osc_out4">
+		<parameter name="address">192.168.232.44</parameter>
+		<parameter name="port">@port</parameter>
+</node>
+<node class="osc_sender" name="osc_out5">
+		<parameter name="address">192.168.232.45</parameter>
+		<parameter name="port">@port</parameter>
+</node>
 <node class="webserver" name="webserver">
 <parameter name="port">@webport</parameter>
 </node>
@@ -71,6 +92,11 @@
  
 <event>
 route(sync:perform)->osc_out:/perform;
+route(sync:perform)->osc_out1:/perform;
+route(sync:perform)->osc_out2:/perform;
+route(sync:perform)->osc_out3:/perform;
+route(sync:perform)->osc_out4:/perform;
+route(sync:perform)->osc_out5:/perform;
 route(control:pause)->playback:pause;
 route(pass(FALSE))->playback:pause;
 </event>
