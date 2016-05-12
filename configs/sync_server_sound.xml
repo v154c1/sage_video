@@ -9,9 +9,13 @@
 <variable name="websize" description="Web port">320x240</variable>
 <variable name="webfps" description="Web fps">10</variable>
 
+<variable name="channels" description="Number of output channels">2</variable>
+<variable name="name" description="JACK client name">sage_video</variable>
+
 <node class="rawavsource" name="video">
 	<parameter name="filename">@file</parameter>
-	<parameter name="max_audio">0</parameter>
+	<parameter name="max_audio">1</parameter>
+	<parameter name="audio_sample_rate">44100</parameter>
 </node>
 
 <node class="onepc_protocol_coordinator" name="sync">
@@ -83,6 +87,14 @@
 
 <node class="playback_controller" name="playback">
 </node>
+
+<node class="jack_output" name="audio">
+                <parameter name="channels">@channels</parameter>
+                <parameter name="client_name">@name</parameter>
+        
+</node>
+
+
 <!-- 
 <node class="jack_output" name="jack">
 <parameter name="connect_to">system</parameter>
@@ -98,7 +110,7 @@ route(sync:perform)->osc_out3:/perform;
 route(sync:perform)->osc_out4:/perform;
 route(sync:perform)->osc_out5:/perform;
 route(control:pause)->video:pause;
-route(pass(FALSE))->video:pause;
+
 </event>
 
 <link class="single_blocking" name="input" source="video:0" target="playback:0"/>
@@ -112,4 +124,7 @@ route(pass(FALSE))->video:pause;
 <link class="single" name="to_jpg" source="resize:0" target="jpeg:0"/>
 <link class="single" name="web" source="jpeg:0" target="img:0"/>
 
+<link class="count_limited" name="audio" source="video:1" target="audio:0">
+	<parameter name="count">5</parameter>
+</link>
 </app>
