@@ -30,24 +30,24 @@
 </node>
 
 <node class="osc_sender" name="osc_out1">
-		<parameter name="address">192.168.232.41</parameter>
+		<parameter name="address">195.113.232.41</parameter>
 		<parameter name="port">@port</parameter>
 </node>
 
 <node class="osc_sender" name="osc_out2">
-		<parameter name="address">192.168.232.42</parameter>
+		<parameter name="address">195.113.232.42</parameter>
 		<parameter name="port">@port</parameter>
 </node>
 <node class="osc_sender" name="osc_out3">
-		<parameter name="address">192.168.232.43</parameter>
+		<parameter name="address">195.113.232.43</parameter>
 		<parameter name="port">@port</parameter>
 </node>
 <node class="osc_sender" name="osc_out4">
-		<parameter name="address">192.168.232.44</parameter>
+		<parameter name="address">195.113.232.44</parameter>
 		<parameter name="port">@port</parameter>
 </node>
 <node class="osc_sender" name="osc_out5">
-		<parameter name="address">192.168.232.45</parameter>
+		<parameter name="address">195.113.232.45</parameter>
 		<parameter name="port">@port</parameter>
 </node>
 <node class="webserver" name="webserver">
