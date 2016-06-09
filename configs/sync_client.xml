@@ -7,6 +7,7 @@
 <variable name="resolution" description="">1920x1080</variable>
 <variable name="pad" description="">@resolution</variable>
 <variable name="halign" description="">center</variable>
+<variable name="pbo" description="">True</variable>
 
 <node class="rawavsource" name="video">
 	<parameter name="filename">@file</parameter>
@@ -33,6 +34,7 @@
 <node class="glx_window" name="glx">
 	<parameter name="display">@display</parameter>
 	<parameter name="resolution">@resolution</parameter>
+	<parameter name="pbo">@pbo</parameter>
 </node>
 
 

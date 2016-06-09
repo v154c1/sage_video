@@ -4,6 +4,7 @@
 <variable name="port" description="target port">20103</variable>
 <variable name="display" description="display">:0</variable>
 <variable name="resolution" description="">1920x4320</variable>
+<variable name="pbo" description="Use PBO">True</variable>
 
 <node class="rawavsource" name="video">
 	<parameter name="filename">@file</parameter>
@@ -18,6 +19,7 @@
 <node class="glx_window" name="glx">
 	<parameter name="display">@display</parameter>
 	<parameter name="resolution">@resolution</parameter>
+	<parameter name="pbo">@pbo</parameter>
 </node>
 
 <node class="osc_receiver" name="osc_in">
