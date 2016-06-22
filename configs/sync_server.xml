@@ -8,6 +8,7 @@
 <variable name="webport" description="Web port">9080</variable>
 <variable name="websize" description="Web port">320x240</variable>
 <variable name="webfps" description="Web fps">10</variable>
+<variable name="format" description="Output format"></variable>
 
 <node class="rawavsource" name="video">
 	<parameter name="filename">@file</parameter>
@@ -15,8 +16,13 @@
 </node>
 
 <node class="onepc_protocol_coordinator" name="sync">
-	
 </node>
+
+<node class="convert" name="convert">
+	<parameter name="format">@format</parameter>
+	<parameter name="allow_passthrough">TRUE</parameter>
+</node>
+
 
 <node class="glx_window" name="glx">
 <parameter name="display">@display</parameter>
@@ -101,12 +107,12 @@ route(control:pause)->video:pause;
 route(pass(FALSE))->video:pause;
 </event>
 
-<link class="single_blocking" name="input" source="video:0" target="playback:0"/>
-<!-- <link class="single" name="audio" source="video:1" target="jack:0"/>  -->
-<link class="single_blocking" name="playback" source="playback:0" target="sync:0"/>
+<link class="single_blocking" name="input" source="video:0" target="sync:0"/>
 
 <link class="single" name="to_dup" source="sync:0" target="dup:0"/>
-<link class="single" name="show" source="dup:-1" target="glx:0"/>
+<link class="single" name="show" source="dup:-1" target="convert:0"/>
+<link class="single" name="show2" source="convert:0" target="glx:0"/>
+
 <link class="single" name="to_fps" source="dup:-1" target="fps:0"/>
 <link class="single" name="to_resize" source="fps:0" target="resize:0"/>
 <link class="single" name="to_jpg" source="resize:0" target="jpeg:0"/>

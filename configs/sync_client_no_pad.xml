@@ -5,6 +5,7 @@
 <variable name="display" description="display">:0</variable>
 <variable name="resolution" description="">1920x4320</variable>
 <variable name="pbo" description="Use PBO">True</variable>
+<variable name="format" description="Output format">none</variable>
 
 <node class="rawavsource" name="video">
 	<parameter name="filename">@file</parameter>
@@ -15,6 +16,10 @@
 	<parameter name="fps_stats">100</parameter>	
 </node>
 
+<node class="convert" name="convert">
+	<parameter name="format">@format</parameter>
+	<parameter name="allow_passthrough">1</parameter>
+</node>
 
 <node class="glx_window" name="glx">
 	<parameter name="display">@display</parameter>
@@ -35,6 +40,7 @@ route(osc_in:/perform)->sync:perform;
 <link class="count_limited_blocking" name="input" source="video:0" target="sync:0">
 	<parameter name="count">5</parameter>
 </link>
-<link class="single" name="show" source="sync:0" target="glx:0"/>
+<link class="single" name="show" source="sync:0" target="convert:0"/>
+<link class="single" name="show" source="convert:0" target="glx:0"/>
 	
 </app>

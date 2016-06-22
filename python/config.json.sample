@@ -1,0 +1,16 @@
+{
+    "total_x": 9600, 
+    "total_y": 4320, 
+    "stripes_x": 5, 
+    "stripes_y": 1,
+
+    "renderers": {
+	    "0_0": {
+	        "dir": "/usr/share/sage_video/configs", 
+	        "address": "sage@xxxx"
+	    },
+    },
+    "server": {
+	"dir": "/ush/share/sage_video/configs"
+    }
+}

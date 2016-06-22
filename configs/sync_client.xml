@@ -8,11 +8,17 @@
 <variable name="pad" description="">@resolution</variable>
 <variable name="halign" description="">center</variable>
 <variable name="pbo" description="">True</variable>
+<variable name="format" description="Output format"></variable>
 
 <node class="rawavsource" name="video">
 	<parameter name="filename">@file</parameter>
 	<parameter name="fps">-1</parameter>
 
+</node>
+
+<node class="convert" name="convert">
+	<parameter name="format">@format</parameter>
+	<parameter name="allow_passthrough">1</parameter>
 </node>
 
 <node class="crop" name="crop">
@@ -49,7 +55,10 @@ route(osc_in:*)->info:*;
 
 
 
-<link class="count_limited_blocking" name="input" source="video:0" target="crop:0">
+<link class="count_limited_blocking" name="input" source="video:0" target="convert:0">
+	<parameter name="count">5</parameter>
+</link>
+<link class="count_limited_blocking" name="input_converted" source="convert:0" target="crop:0">
 	<parameter name="count">5</parameter>
 </link>
 <link class="count_limited_blocking" name="cropped" source="crop:0" target="pad:0">
