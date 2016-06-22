@@ -185,7 +185,7 @@ def play(cfg, video_file, out_prefix, sound, format, dry):
         renderer = cfg['renderers'][tile_id]
 
         cmdline = ['ssh', '-t',
-                   renderer['address'], '/usr/bin/yuri2',
+                   renderer['address'], 'DISPLAY=:0', '/usr/bin/yuri2',
                    os.path.join(renderer['dir'], client_cfg),
                    '-o', '/tmp/sage_video.log',
                    'resolution=%dx%d' % (part_width, part_height),

@@ -8,7 +8,7 @@
 	    "0_0": {
 	        "dir": "/usr/share/sage_video/configs", 
 	        "address": "sage@xxxx"
-	    },
+	    }
     },
     "server": {
 	"dir": "/usr/share/sage_video/configs"
