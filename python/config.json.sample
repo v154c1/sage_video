@@ -11,6 +11,6 @@
 	    },
     },
     "server": {
-	"dir": "/ush/share/sage_video/configs"
+	"dir": "/usr/share/sage_video/configs"
     }
 }
