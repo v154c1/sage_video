@@ -1,0 +1,10 @@
+<!--   OUTPUT TO NODE ${IDX} @ ${IP} -->
+
+<node class="simple_h264_sender" name="rtp${IDX}">
+        <parameter name="address">${IP}</parameter>
+        <parameter name="mtu">@mtu</parameter>
+</node>
+
+<link name="out${IDX}" class="unlimited" source="dup:-1" target="rtp${IDX}:0"/>
+
+<!--   END OF  NODE ${IDX} -->

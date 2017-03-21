@@ -7,7 +7,9 @@
     "renderers": {
 	    "0_0": {
 	        "dir": "/usr/share/sage_video/configs", 
-	        "address": "sage@xxxx"
+	        "address": "sage@xxxx",
+	        "webcam_root": "/XXXX/XXX/virtual_webcam",
+	        "alt_ip": "xxxxx"
 	    }
     },
     "server": {
