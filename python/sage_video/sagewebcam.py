@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 '''
 Created on 21. 3. 2017
 
