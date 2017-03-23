@@ -145,6 +145,9 @@ if __name__ == '__main__':
         '--info', '-i', help='Show info and quit', action='store_true', dest='show_info')
     parser.add_argument(
         '--dry-run', '-n', help='Dry run (display commends to be executed, but do not execute them', dest='dry_run', action='store_true')
+    parser.add_argument(
+        '--log', '-l', help='Write logs to /tmp', dest='use_log', default=False, action='store_true')
+
     parser.add_argument('video_file', help='video file')
 
     args = parser.parse_args()
@@ -178,7 +181,7 @@ if __name__ == '__main__':
     bps=args.bps
     alt_ip = args.alt_ip
     instances = []
-    
+    use_log = args.use_log
     
 #     idx = 0
     for idx, name in enumerate(cfg['renderers']):
@@ -189,6 +192,7 @@ if __name__ == '__main__':
             sys.exit(1)
         print('Using %s through /proc/%s on node %s (%s)'%(dev['device'],dev['name'],name,node['address']))
         dev['node']=node
+        dev['node_name']=name
         devs.append(dev)
         nodes = nodes + inner_tpl.substitute({'IDX':idx, 'IP':get_node_ip(node, alt_ip)})+u'\n\n'
         
@@ -202,7 +206,7 @@ if __name__ == '__main__':
         
 #     print ('Using MTU %d'%args.mtu)
 
-    
+    fps_stats = 100 if use_log else 0
     
     for dev in devs:
         node=dev['node']
@@ -210,18 +214,21 @@ if __name__ == '__main__':
                    node['address'], 
                    'DISPLAY=:0', 
                    '/usr/bin/yuri_simple',
-                   'simple_h264_receiver[address=0.0.0.0]',
+                   'simple_h264_receiver[address=0.0.0.0,fps_stats=%d]'%fps_stats,
                    '-punlimited',
-                   'avdecoder',
+                   'avdecoder[fps_stats=%d]'%fps_stats,
                    '-psingle',
-                   'convert[format=%s]'%dev['format'],
+                   'convert[format=%s,fps_stats=%d]'%(dev['format'],fps_stats),
                    'filedump[filename=/proc/%s]'%dev['name']
                    ]
         
         print (str(cmdline))
         if not dry:
-            dev_null = subprocess.DEVNULL if 'DEVNULL' in subprocess.__all__ else open(os.devnull, 'wb')
-            p = subprocess.Popen(cmdline, stdout=dev_null, stderr=dev_null)
+            if use_log:
+                log_file = open('/tmp/sagewebcam_%s.log'%dev['node_name'], 'wb')
+            else:
+                log_file = subprocess.DEVNULL if 'DEVNULL' in subprocess.__all__ else open(os.devnull, 'wb')
+            p = subprocess.Popen(cmdline, stdout=log_file, stderr=subprocess.STDOUT)
             instances.append(p)
             time.sleep(0.5)
             
@@ -229,12 +236,16 @@ if __name__ == '__main__':
                xml_name, 
                'file=' + video_file,
                'mtu=%d' %mtu,
-               'bps=%s'%bps
+               'bps=%s'%bps,
+               'fps_stats=%d'%fps_stats
                ]
     print(cmdline)
     if not dry:
-        dev_null = subprocess.DEVNULL if 'DEVNULL' in subprocess.__all__ else open(os.devnull, 'wb')
-        yuri_server = subprocess.Popen(cmdline, stderr=dev_null, stdout=dev_null)
+        if use_log:
+            log_file = open('/tmp/sagewebcam_main.log', 'wb')
+        else:
+            log_file = subprocess.DEVNULL if 'DEVNULL' in subprocess.__all__ else open(os.devnull, 'wb')
+        yuri_server = subprocess.Popen(cmdline, stdout=log_file, stderr=subprocess.STDOUT)
 
         try:
             yuri_server.wait()
