@@ -147,6 +147,8 @@ if __name__ == '__main__':
         '--dry-run', '-n', help='Dry run (display commends to be executed, but do not execute them', dest='dry_run', action='store_true')
     parser.add_argument(
         '--log', '-l', help='Write logs to /tmp', dest='use_log', default=False, action='store_true')
+    parser.add_argument('--streamer', '-s', help='Streamer implementation (yuri or uv)',
+                        dest='streamer', default='yuri')
 
     parser.add_argument('video_file', help='video file')
 
@@ -182,6 +184,8 @@ if __name__ == '__main__':
     alt_ip = args.alt_ip
     instances = []
     use_log = args.use_log
+    use_uv = args.streamer == 'uv'
+    print('Using %s streamer'%('ultragrid' if use_uv else 'YURI'))
     
 #     idx = 0
     for idx, name in enumerate(cfg['renderers']):
@@ -194,7 +198,7 @@ if __name__ == '__main__':
         dev['node']=node
         dev['node_name']=name
         devs.append(dev)
-        nodes = nodes + inner_tpl.substitute({'IDX':idx, 'IP':get_node_ip(node, alt_ip)})+u'\n\n'
+        nodes = nodes + inner_tpl.substitute({'IDX':idx, 'IP':get_node_ip(node, alt_ip), 'STREAMER': 'uv_rtp_sender' if use_uv else 'simple_h264_sender'})+u'\n\n'
         
         
     oxml = main_tpl.substitute({'NODES':nodes})
@@ -214,7 +218,7 @@ if __name__ == '__main__':
                    node['address'], 
                    'DISPLAY=:0', 
                    '/usr/bin/yuri_simple',
-                   'simple_h264_receiver[address=0.0.0.0,fps_stats=%d]'%fps_stats,
+                   '%s[address=0.0.0.0,fps_stats=%d]'%('uv_rtp_receiver' if use_uv else 'simple_h264_receiver', fps_stats),
                    '-punlimited',
                    'avdecoder[fps_stats=%d]'%fps_stats,
                    '-psingle',
