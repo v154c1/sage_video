@@ -19,7 +19,55 @@ INSTALL_DIR = "/etc/sage_video"
 
 # SERVER_CFG_FILE = 'unicast_stream_file_yuri.xml'
 MAIN_XML_TEMPLATE = 'unicast_stream_file_yuri.template.xml'
+MAIN_XML_DIRECT_TEMPLATE = 'unicast_stream_file_direct_yuri.template.xml'
+MAIN_XML_DECKLINK_TEMPLATE = 'unicast_stream_decklink_yuri.template.xml'
+
 INNER_XML_TEMPLATE = 'unicast_stream_yuri_rtp.template.xml'
+
+DECKLINK_FORMATS={
+    'pal': [720, 576],
+    'palp': [720, 576],
+    'ntsc': [720,486],
+    'ntscp': [720,486],
+    'ntsc2398': [720,486],
+    
+    #'720p24': [1280, 720],
+#     '720p25': [1280, 720],
+#     '720p30': [1280, 720],
+    
+    '720p50': [1280, 720],
+    '720p60': [1280, 720],
+    '720p5994': [1280, 720],
+    
+    '1080p2398': [1920, 1080],
+    '1080p24': [1920, 1080],
+    '1080p25': [1920, 1080],
+    '1080p2997': [1920, 1080],
+    '1080p30': [1920, 1080],
+    '1080p50': [1920, 1080],
+    '1080p5994': [1920, 1080],
+    '1080p60': [1920, 1080],
+    
+    '1080i50': [1920, 1080],
+    '1080i5994': [1920, 1080],
+    '1080i60': [1920, 1080],
+    
+    '1080p24PsF': [1920, 1080],
+    '1080p2398PsF': [1920, 1080],
+    
+    '2k2398': [2048, 1080],
+    '2k24': [2048, 1080],
+    '2k25': [2048, 1080],
+    
+    '4k2398': [3840, 2160],
+    '4k24': [3840, 2160],
+    '4k25': [3840, 2160],
+    '4k2997': [3840, 2160],
+    '4k30': [3840, 2160]
+    }
+    
+                  
+
 def get_video_info(filename):
     video_data = json.loads(subprocess.check_output(
         ['ffprobe', '-of', 'json', '-show_streams', '-select_streams', 'v', filename], stderr=subprocess.PIPE).decode('utf8'))
@@ -141,6 +189,10 @@ if __name__ == '__main__':
     parser.add_argument('--bps', '-b', help='Specify BPS for encoder', dest='bps', type=int, default=-1)
     parser.add_argument('--alternative', '-a', action='store_true',
                          default=False, dest='alt_ip', help='Use alternate IP')
+    parser.add_argument('--encode', '-e', action='store_true',
+                         default=False, dest='encode', help='Force reencoding of the video, even if not needed')
+    parser.add_argument('--decklink', '-d', action='store_true',
+                         default=False, dest='decklink', help='Use live input from decklink instead of a file.')
     parser.add_argument(
         '--info', '-i', help='Show info and quit', action='store_true', dest='show_info')
     parser.add_argument(
@@ -150,7 +202,7 @@ if __name__ == '__main__':
     parser.add_argument('--streamer', '-s', help='Streamer implementation (yuri or uv)',
                         dest='streamer', default='yuri')
 
-    parser.add_argument('video_file', help='video file')
+    parser.add_argument('video_file', help='video file or decklink format')
 
     args = parser.parse_args()
 
@@ -159,24 +211,10 @@ if __name__ == '__main__':
     if not os.path.exists(args.cfg_file):
         print('Config file \'%s\' doesn\'t exist!' % args.cfg_file)
         sys.exit(1)
-
-    if not os.path.exists(args.video_file):
-        print('Video file \'%s\' doesn\'t exist!' % args.video_file)
-        sys.exit(1)
-
+    
     cfg = json.load(open(args.cfg_file, 'rt'))
-    cfg['video'] = get_video_info(args.video_file)
-    
-    
-    #print (json.dumps(cfg['video'], indent=2))
-    
-    stream = cfg['video']['streams'][0]
-    devs = []
-    nodes=u''
-    
-    main_tpl = Template(open(os.path.join(cfg['server']['dir'], MAIN_XML_TEMPLATE)).read())
-    inner_tpl = Template(open(os.path.join(cfg['server']['dir'], INNER_XML_TEMPLATE)).read())
-    
+        
+    template_name = u''
     dry = args.dry_run
     video_file = args.video_file
     mtu = args.mtu
@@ -185,6 +223,41 @@ if __name__ == '__main__':
     instances = []
     use_log = args.use_log
     use_uv = args.streamer == 'uv'
+    force_encoding = args.encode
+    
+    if args.decklink:
+        if not video_file in DECKLINK_FORMATS:
+            print('Format %s not supported for decklink input! Supported formats are: %s'%(video_file, ', '.join(sorted(DECKLINK_FORMATS.keys()))))
+            sys.exit(1)
+        print ('Using input from decklink in format '+args.video_file)
+        f = DECKLINK_FORMATS[video_file]
+        stream={'width': f[0], 'height': f[1]}
+        template_name = MAIN_XML_DECKLINK_TEMPLATE
+    else:
+        if not os.path.exists(args.video_file):
+            print('Video file \'%s\' doesn\'t exist!' % args.video_file)
+            sys.exit(1)
+    
+        
+        cfg['video'] = get_video_info(args.video_file)
+        stream = cfg['video']['streams'][0]    
+        if (not stream['codec_name'] == 'h264') or force_encoding:
+            template_name = MAIN_XML_TEMPLATE
+            print('Input file is in format %s, reencoding'%stream['codec_name'])
+        else:
+            print('Streaming direcly the encoded content from input file in %s'%stream['codec_name'])
+            template_name = MAIN_XML_DIRECT_TEMPLATE
+        
+         
+    #print (json.dumps(cfg['video'], indent=2))
+    
+
+    devs = []
+    nodes=u''
+    
+    main_tpl = Template(open(os.path.join(cfg['server']['dir'], template_name)).read())
+    inner_tpl = Template(open(os.path.join(cfg['server']['dir'], INNER_XML_TEMPLATE)).read())
+    
     print('Using %s streamer'%('ultragrid' if use_uv else 'YURI'))
     
 #     idx = 0
@@ -241,7 +314,8 @@ if __name__ == '__main__':
                'file=' + video_file,
                'mtu=%d' %mtu,
                'bps=%s'%bps,
-               'fps_stats=%d'%fps_stats
+               'fps_stats=%d'%fps_stats,
+               'resolution=%dx%d'% (stream['width'], stream['height'])
                ]
     print(cmdline)
     if not dry:

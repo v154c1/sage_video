@@ -1,0 +1,24 @@
+<app>
+
+<variable name="file"></variable>
+<variable name="bps">-1</variable>
+<variable name="fps">0</variable>
+<variable name="fps_stats">100</variable>
+<variable name="mtu">1400</variable>
+
+<node class="rawavsource" name="src">
+        <parameter name="filename">@file</parameter>
+        <parameter name="fps">@fps</parameter>
+        <parameter name="decode">FALSE</parameter>
+        
+</node>
+
+
+<node class="dup" name="dup"/>
+
+
+<link name="comp" class="unlimited" source="src:0" target="dup:0"/>
+
+${NODES}
+
+</app>
