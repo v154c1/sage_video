@@ -287,7 +287,7 @@ if __name__ == '__main__':
     
     for dev in devs:
         node=dev['node']
-        cmdline = ['ssh', '-t',
+        cmdline = ['ssh', '-t','-t',
                    node['address'], 
                    'DISPLAY=:0', 
                    '/usr/bin/yuri_simple',
@@ -305,7 +305,8 @@ if __name__ == '__main__':
                 log_file = open('/tmp/sagewebcam_%s.log'%dev['node_name'], 'wb')
             else:
                 log_file = subprocess.DEVNULL if 'DEVNULL' in subprocess.__all__ else open(os.devnull, 'wb')
-            p = subprocess.Popen(cmdline, stdout=log_file, stderr=subprocess.STDOUT)
+            sin = subprocess.PIPE#open(os.devnull, 'rb')
+            p = subprocess.Popen(cmdline, stdout=log_file, stderr=subprocess.STDOUT, stdin=sin)
             instances.append(p)
             time.sleep(0.5)
             
@@ -343,10 +344,21 @@ if __name__ == '__main__':
 
     for i in instances:
         print('Ending an instance')
-        i.send_signal(subprocess.signal.SIGINT)
+        i.stdin.write(b'\x03')
         try:
-            i.wait(5)
-        except:
+            if sys.version_info.major >= 3:
+                i.wait(5)
+            else:
+                counter = 50
+                while counter > 0:
+                    if i.poll() != None:
+                        break
+                    time.sleep(0.1)
+                    counter -= 1
+                else:
+                    raise subprocess.TimeoutExpired
+        except Exception as e:
+            print('Instance didn\'t end voluntarily (%s), killing it'%(str(e)))
             i.kill()
 
     del instances
