@@ -140,7 +140,16 @@ def cut(cfg, filename, out_prefix, dry):
             print('cmdline: %s' % str(cmdline))
             if not dry:
                 subprocess.call(cmdline)
-
+    # Prepare small file
+    ofn = '%s_small.mp4' % (out_prefix)
+    if os.path.exists(ofn):
+        print('File %s already exists' % (ofn))
+    else:
+        cmdline = ['ffmpeg', '-i', filename, '-s', '160x120',
+                    '-strict' ,'-2', '-c:a', 'aac', '-c:v', 'libx264', '-preset', 'slower', ofn]
+        print('cmdline: %s' % str(cmdline))
+        if not dry:
+            subprocess.call(cmdline)
 
 def play(cfg, video_file, out_prefix, sound, format, dry):
     client_cfg = CLIENT_CFG_FILE if out_prefix else CLIENT_CFG_FILE_PAD
