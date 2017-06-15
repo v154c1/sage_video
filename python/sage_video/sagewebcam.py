@@ -76,7 +76,8 @@ def get_video_info(filename):
 def vcctrl(node, cmds):
     dev_null = subprocess.DEVNULL if 'DEVNULL' in subprocess.__all__ else open(
         os.devnull, 'wb')
-    cmdline = ['ssh', '-t', node['address'], os.path.join(node['webcam_root'], 'utils','vcctrl')] + cmds
+    vcctrl_path = os.path.join(node['webcam_root'], 'utils','vcctrl') if node['webcam_root'] else 'vcctrl'
+    cmdline = ['ssh', '-t', node['address'], vcctrl_path] + cmds
     return subprocess.check_output(cmdline, stderr=dev_null).decode('utf-8').splitlines()
 
 def vcctrl_check_list(out):
