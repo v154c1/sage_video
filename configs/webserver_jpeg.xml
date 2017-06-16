@@ -1,0 +1,33 @@
+<app>
+
+<variable name="filename"></variable>
+<variable name="port">8880</variable>
+<variable name="format" description="intermediate format">yuv</variable>
+<variable name="q">75</variable>
+
+<node class="rawavsource" name="src">
+    <parameter name="filename">@filename</parameter>
+</node>
+
+<node class="convert" name="convert">
+    <parameter name="format">@format</parameter>
+</node>
+
+<node class="jpeg_encoder" name="jpeg">
+    <parameter name="quality">@q</parameter>
+</node>
+
+<node class="webserver" name="web">
+    <parameter name="port">@port</parameter>
+</node>
+
+<node class="web_image" name="img">
+    <parameter name="path">/image.jpg</parameter>
+</node>
+
+
+<link class="single" name="src" source="src:0" target="convert:0"/>
+<link class="single" name="raw" source="convert:0" target="jpeg:0"/>
+<link class="single" name="jpg" source="jpeg:0" target="img:0"/>
+
+</app>
