@@ -1,0 +1,15 @@
+{
+	"main_script": "local_webcam.js",
+	"icon": "local_webcam.png",
+	"width": 1920,
+	"height": 1080,
+	"animation": true,
+	"dependencies": [
+	],
+	"title": "Local webcam viewer",
+	"version": "0.1.0",
+	"description": "Local webcam viewer",
+	"keywords": [ "webcam", "local" ],
+	"author": "Jiri Melnikov <melnikov@cesnet.cz>",
+	"license": "SAGE2-Software-License"
+}
