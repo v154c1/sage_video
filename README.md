@@ -131,7 +131,7 @@ The nodes then decode the video a puts it into the virtual webcamera. Then, simp
 ### Usage
 - Firstly, make sure the vcmod module is loaded on all nodes
 - Run the sagewebcam script 
-- Run SAGE2 application showing the webcam output
+- Run SAGE2 application **local_webcam** showing the webcam output
 
 
 ```bash
@@ -168,7 +168,7 @@ On the **server**, firstly start the server (in webrtc directory):
 npm run start
 ```
 
-Then run *sagewebrtc* script and access http://localhost:8800/. This should connect to virtual webcam. Now you can start the application on sage.
+Then run *sagewebrtc* script and access http://localhost:8800/. This should connect to virtual webcam. Now you can start the application **webrtc_test** on sage.
 
 ```bash
 sagewebrtc /storage/video.mp4
@@ -185,9 +185,13 @@ sagewebrtc /storage/video.mp4
 Before deploying the sage2 application, change the address of **server** in sage_jpeg.js
 
 #### Usage
+- start video:
 ```bash
 sagewebjpeg /storage/VIDEO.mp4
 ```
+- start sage2 application **yuri_image**
+
+
 
 
 
