@@ -1,0 +1,18 @@
+{
+  "name": "sage2_webrtc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Zdenek Travnicek <travnicek@iim.cz>",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.15.3",
+    "http": "0.0.0",
+    "path": "^0.12.7",
+    "ws": "^3.0.0"
+  }
+}

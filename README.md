@@ -4,13 +4,15 @@ Scripts for preparing and playing videos on sage using various methods.
 Currently, we support following methods:
 1. Play hi-res videos (tested up to 8k) on sage-like system, without using any sage library.
 2. Play videos using streaming and virtual webcameras
-
+3. Stream video from virtual webcamera to sage2 using WebRTC
+4. Stream video from local webserver using JPEG
 
 ## Common dependencies and setup
 - [python](https://www.python.org/) (version 3.4 or newer)
 - [libyuri](https://github.com/v154c1/libyuri)
 - [virtual camera](https://github.com/v154c1/virtual_camera)
 - [ffmpeg](http://ffmpeg.org/) - Tested with original FFMPEG. It may work with libav, but it's not supported in any way.
+- [nodejs](https://nodejs.org/) - Only for method 3.
 
 ### Gentoo linux
 An ebuild for these scripts and dependencies (mainly libyuri and virtual webcamera) is also provided as ebuild for **Gentoo Linux** in [cave_overlay](https://github.com/iimcz/cave_overlay) and there;s an overlay list XML on https://iim.cz/cave.xml.
@@ -113,12 +115,18 @@ sagevideo /storage/VIDEO_small.mp4 -o /storage/VIDEO
 Now (without the parameter -p/--prepare), the script plays the small video on server and the preencoded stripes on nodes.
 
 #### Performance
-On our system with 5 sage nodes, all driving 4 fullHD displays, we're able to use the direct method for resolutions up to 4k. FOr higher resolutions, it's usually needed to prepare them.
+On our system with 5 sage nodes, all driving 4 fullHD displays, we're able to use the direct method for resolutions up to 4k. For higher resolutions, it's usually needed to prepare them.
 
 
 ## 2. using virtual webcamera
+#### Expected setup
+Server playing the video (either from a video file or from a decklink capture card), receivers with virtual camera on nodes and sage2 application displaying the video.
+
+
 This setup a slightly more complicated. It take the input file (or output of decklink capture card) and streams it to sage nodes using RTP in h.264.
 The nodes then decode the video a puts it into the virtual webcamera. Then, simple sage2 application displaying output of the webcamera can be used to show the video, as a SAGE2 application.
+
+
 
 ### Usage
 - Firstly, make sure the vcmod module is loaded on all nodes
@@ -141,8 +149,45 @@ There are several parameters that change the bahaviour:
 - -m/--mtu - Specifies mtu
 
 
+## 3. WebRTC
+
+#### Expected setup
+Server with virtual webcamera and browser (chrome). The server has to have **vcmod** module loaded.
+
+#### Installing
+Before installing sage2 application, change the address of websocket server in the sage_webrtc.js to address of **server**.
+On the server side, run 
+```bash
+npm install
+```
+in the *webrtc* directory.
+
+#### Usage
+On the **server**, firstly start the server (in webrtc directory):
+```bash
+npm run start
+```
+
+Then run *sagewebrtc* script and access http://localhost:8800/. This should connect to virtual webcam. Now you can start the application on sage.
+
+```bash
+sagewebrtc /storage/video.mp4
+```
+
+## 4. Local webserver and JPEGs
+
+#### Expected setup
+**Server** opens a file, encodes frames to JPEG and starts a webserver providing these images.
+**sage2** application then periodically takes images from the webserver.
 
 
+#### Installing
+Before deploying the sage2 application, change the address of **server** in sage_jpeg.js
+
+#### Usage
+```bash
+sagewebjpeg /storage/VIDEO.mp4
+```
 
 
 

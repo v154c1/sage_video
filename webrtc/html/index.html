@@ -1,0 +1,116 @@
+<html ng-app="sage2webrtc">
+  <head>
+    <script type="text/javascript" src="angular.min.js"></script>
+    <script type="text/javascript" src="simplepeer.min.js"></script>
+    <script type="text/javascript" src="ui-bootstrap-tpls-2.4.0.min.js"></script>
+    <link rel="stylesheet" href="bootstrap.min.css"></link>
+  </head>
+  <body ng-controller="streamCtrl">
+    <style>
+      #outgoing {
+        width: 600px;
+        word-wrap: break-word;
+      }
+    </style>
+
+    <script type="text/javascript">
+
+var app = angular.module('sage2webrtc', ['ui.bootstrap']);
+console.log('app created');
+
+app.controller('streamCtrl',  function streamCtrl($scope) {
+
+var self = $scope;
+console.log('start');
+$scope.media = null;
+$scope.peers = new Array();
+$scope.signaling = new WebSocket("ws://" + window.location.host);
+
+$scope.messages=[];
+$scope.peer_states=[];
+
+navigator.getUserMedia(
+	{ 
+		video: {
+			mandatory: {
+				minWidth: 1280, 
+				minHeight: 720}
+			}, 
+		audio: false 
+	}, 
+	function(mm) {
+		self.$apply(function(){
+			self.media = mm;
+			self.messages.push({text: 'Received stream', cls:'success'});
+		});
+	}, 
+	function() {
+		console.log('Failed to get media');
+	});
+
+$scope.signaling.onmessage = function (event) {
+	console.log(event);
+	data = JSON.parse(event.data);
+	console.log(data);
+	if (data.state == 'init') {
+		console.log('Initiating peer');
+		var peer = new SimplePeer({initiator:true, stream: self.media});
+		self.peers.push(peer);
+		idx = self.peers.length - 1;
+		self.$apply(function(){
+			self.messages.push({text: 'New client', cls:'success'});
+		});
+		peer.on('signal', function (data2) {
+   	 		self.signaling.send(JSON.stringify({state:'to_client',index:idx,data:data2,client_id:data.client_id}));
+  		});
+
+	} else 
+	if (data.state == 'to_server') {
+		console.log('Processing event');
+		var peer = self.peers[data.index];
+	    	peer.signal(data.data);	
+	} else if (data.state == 'status') {
+		console.log('Peer '+data.index+' reports: '+data.message);
+		self.$apply(function(){
+			self.peer_states[data.index]=data.message;
+		});
+	}
+}
+
+$scope.close_msg = function(idx) {
+//	self.$apply(function(){
+		self.messages.splice(idx, 1);
+//	});
+};
+
+$scope.close_peer = function(idx) {
+//	self.$apply(function(){
+//		self.peer_states.splice(idx, 1);
+	self.peer_states[idx]=null;
+//	});
+};
+
+
+});
+
+    </script>
+<div class="container">
+<h1>Sage2 streaming using webrtc</h1>
+<br/>
+<div ng-repeat="m in messages">
+	<div uib-alert ng-class="'alert-'+m.cls" close="close_msg($index)">
+		{{m.text}}
+	</div>
+</div>
+<div ng-repeat="p in peer_states track by $index">
+	<div uib-alert class="alert-info" close="close_peer($index)" ng-show="p">
+		{{$index}}:&nbsp;{{p}}
+	</div>
+</div>
+
+
+</div>
+  </body>
+</html>
+
+
