@@ -1,0 +1,16 @@
+{
+	"main_script": "yuri_image.js",
+	"icon": "yuri_image.webp",
+	"width": 1280,
+	"height": 720,
+	"resize": "free",
+	"animation": true,
+	"dependencies": [
+	],
+	"title": "Yuri image",
+	"version": "1.0.0",
+	"description": "Limited yuri img stream",
+	"keywords": [ "online", "img", "web" ],
+	"author": "Author <author@me.me>",
+	"license": "SAGE2-Software-License"
+}
