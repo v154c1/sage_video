@@ -1,0 +1,17 @@
+{
+	"main_script": "webrtc_test.js",
+	"icon": "webrtc_test.webp",
+	"width": 1280,
+	"height": 720,
+	"resize": "free",
+	"animation": true,
+	"dependencies": [
+		"simplepeer.min.js"		
+	],
+	"title": "WEBRTC test",
+	"version": "1.0.0",
+	"description": "Limited webrtc stream",
+	"keywords": [ "online", "img", "web" ],
+	"author": "Author <author@me.me>",
+	"license": "SAGE2-Software-License"
+}
