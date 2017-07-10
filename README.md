@@ -1,18 +1,21 @@
-# sage_video
-Scripts for preparing and playing videos on sage using various methods.
+# High resolution video playback and streaming for LCD walls
+This document describes scripts for preparing, playing and network streaming of videos on hi-res LCD walls using various methods with and without the SAGE2 software.
 
-Currently, we support following methods:
-1. Play hi-res videos (tested up to 8k) on sage-like system, without using any sage library.
-2. Play videos using streaming and virtual webcameras
-3. Stream video from virtual webcamera to sage2 using WebRTC
-4. Stream video from local webserver using JPEG
+Currently, we support the following methods:
+1. Local playback of hi-res video (tested up to 8k) on an LCD wall (without SAGE2)
+2. Network streaming of video to SAGE2 using virtual web cameras and external streaming software
+3. Network streaming of video to SAGE2 using WebRTC
+4. Network streaming of video to SAGE2 using JPEG
+
+Method 2 is the most powerful network streaming. Methods 3 and 4 are alternatives with simpler setup.
 
 ## Common dependencies and setup
 - [python](https://www.python.org/) (version 3.4 or newer)
 - [libyuri](https://github.com/v154c1/libyuri)
 - [virtual camera](https://github.com/v154c1/virtual_camera)
 - [ffmpeg](http://ffmpeg.org/) - Tested with original FFMPEG. It may work with libav, but it's not supported in any way.
-- [nodejs](https://nodejs.org/) - Only for method 3.
+- [ultragrid](http://www.ultragrid.cz) – for method 2
+- [nodejs](https://nodejs.org/) - for method 3.
 
 ### Gentoo linux
 An ebuild for these scripts and dependencies (mainly libyuri and virtual webcamera) is also provided as ebuild for **Gentoo Linux** in [cave_overlay](https://github.com/iimcz/cave_overlay) and there;s an overlay list XML on https://iim.cz/cave.xml.
@@ -25,18 +28,18 @@ layman -a cave_overlay
 emerge -atv sage_video virtual_camera
 ```
 
-### Different linux distributions
+### Other linux distributions
 
-When installing without ebuild, you should:
-1. Install dependencies (ffmpeg, libyuri, virtual webcamera)
+When installing withou an ebuild, you should:
+1. Install dependencies (ffmpeg, libyuri, virtual webcamera, ...)
 2. install the script:
-  - Put the scripts anywhere in your path
+  - Put the scripts anywhere in your PATH
   - create configuration file in **/etc/sage_video/config.json** (based on example python/config.json.sample)
   - Dont't forget to specify path to *configs* directory in config.json
 
 
-## Config file
-The sample cofig looks like:
+## Configuration file
+The sample configuration file looks like this:
 ```json
 {
     "total_x": 9600, 
@@ -58,139 +61,146 @@ The sample cofig looks like:
 }
 ```
 
-- total\_x, total\_y - Resolution the the whole wall
-- stripes\_x, stripes\_y - How are the nodes organized (nodes, not monitors). In our case, we have 20 displays - 4 rows and 5 columns. There are 5 nodes, each of then having a single column of 4 displays. So there are 5 stripes in X axis, and only single one in Y.
+- total\_x, total\_y - Resolution the the whole wall in pixels
+- stripes\_x, stripes\_y - How are the PC nodes organized (not displays). For example, in our case, we have 20 displays - 4 rows and 5 columns. There are 5 PC nodes, each of them driving a single column of 4 displays. So there are 5 stripes in X axis, and only one stripe in Y axis.
 - server.dir - Directory with XML configuration files from the repository. 
 - renderers - The **nodes**. 
-  - name of each renderer is "X_Y" - where X is number of stripe in X axis, Y number in Y axis.
+  - name of each renderer is "X_Y" -  where X is the number of stripe in X axis and Y is the number of stripe in Y axis.
   - dir - directory with XML's (like server.dir)
   - address - user and address of the node. e.g. cave@192.168.2.10
-  - alt_ip - alternative IP address (needed only when there are problems with main network)
-  - webcam\_root - root darectory of virtual\_webcam installation. Set this only, when it's not installed in the system.
+  - alt_ip - alternative IP address (if you have multiple network interfaces on nodes and you want to use non-default interfaces, such as local interconnection over private IP addresses)
+  - webcam\_root - root directory of the virtual webcam installation.
 
-Make sure, that user running the script on **server** has rights to access all the nodes using ssh without password (authenticated by a key).
+Make sure that the user running the script on the **server** has rights to access all the nodes using ssh without password (authenticated by a key).
 
-The nodes should have the module **vcmod** (for virtual camera) loaded, preferably set to load automatically on start.
+The nodes should have the module **vcmod** (for virtual camera) loaded, preferably set to load automatically during boot.
 
-## 1. Distributed player
+## 1. Local playback of hi-res video on an LCD wall (without SAGE2)
 
-#### Expected setup:
-- Server - Master PC controlling the playback
-- Nodes - sage nodes
-- Storage - common storage accessible from all the nodes
+This solution works as a distributed player. Video is divided into stripes. Each stripe is played out on a separate node and presented on a vertical column of LCD monitors.
 
-#### How it works
-User starts a script on the **server** and the file is then played synchronously on all ot sage nodes.
-The script also starts a webserver for controlling the playback (pause/play).
+#### Setup:
+- Server - master PC controlling the playback
+- Nodes - PCs for playout of individual stripes
+- Storage - common disk storage accessible from all nodes
+
+#### How it works:
+User starts a script on the **server** and the file is then played synchronously on all the **nodes**.
+. The script also starts a webserver for controlling the playback (pause/play).
 
 Internally, it can work in two modes:
-- direct playback - The **server** and all the **nodes** play the video in full resolution. The **server** send messages to the nodes to maintain synchronization. It can also playback a sound. 
-- Prepared videos - The video to be played is firstly cut into stripes, one for each node. When the video is to be played, the server plays the original video (or scaled down version) and each node plays it's own stripe.
+- Direct playback - The **server** and all **nodes** accept the video file in its full resolution. The **server** sends messages to the nodes to maintain synchronization. The server can also play sound.
+- Prepared videos - The video file is first cut into stripes, one for each node. The server then plays the original video (or a scaled down version) and each node plays just its own stripe. This mode is more effective and allows to play higher resolution videos (8K).
 
 ##### Direct playback:
-Assuming that all machines (nodes and server) ha shared storage mounted on /storage
+Assuming that all PCs (server and nodes) have shared storage mounted on /storage:
 
 ```bash
 sagevideo /storage/VIDEO.mp4
 ```
 
-This plays a video /storage/VIDEO.mp4 on all nodes. All nodes have to play the whole video.
+This plays a video file /storage/VIDEO.mp4 on all nodes, which have to process the full resolution video file.
 
 ```bash
 sagevideo -s /storage/VIDEO.mp4
 ```
 The same with sound (using JACK) enabled.
 
-##### Prepared videos
+##### Prepared videos:
 ```bash
 sagevideo -p /storage/VIDEO.mp4 -o /storage/VIDEO
 ```
 
-This takes the input video, calculates required cropping/padding and creates video for all the stripes and one small video for server.
+This takes the input video file, calculates the required cropping/padding and creates video files for all the stripes and one down scaled video file for the server.
 
 ```bash
 sagevideo /storage/VIDEO_small.mp4 -o /storage/VIDEO
 ```
 
-Now (without the parameter -p/--prepare), the script plays the small video on server and the preencoded stripes on nodes.
+This plays the small video file on the server and the pre-encoded stripes on nodes.
 
-#### Performance
-On our system with 5 sage nodes, all driving 4 fullHD displays, we're able to use the direct method for resolutions up to 4k. For higher resolutions, it's usually needed to prepare them.
-
-
-## 2. using virtual webcamera
-#### Expected setup
-Server playing the video (either from a video file or from a decklink capture card), receivers with virtual camera on nodes and sage2 application displaying the video.
+#### Performance:
+On our system with 5 nodes, each driving four 1080p displays, it is possible to use the direct method for formats up to 4K30p. For higher resolutions, it is needed to prepare the video into stripes.
 
 
-This setup a slightly more complicated. It take the input file (or output of decklink capture card) and streams it to sage nodes using RTP in h.264.
-The nodes then decode the video a puts it into the virtual webcamera. Then, simple sage2 application displaying output of the webcamera can be used to show the video, as a SAGE2 application.
+## 2. Network streaming of video to SAGE2 using a virtual web camera and external streaming software
+#### Setup:
+The setup consists of a server that sends the video (either from a video file or from a capture card), receivers on nodes with virtual web cameras and the SAGE2 application displaying the video.
+
+The actual network streaming is implemented using external streaming software, such as Ultragrid, with H.264 compression and streaming in RTP packets. The PC nodes decode the received video streams and put them into virtual web cameras. The SAGE2 application then displays the output of the web cameras inside web browsers.
 
 
-
-### Usage
-- Firstly, make sure the vcmod module is loaded on all nodes
+### Usage:
+- Load the **vcmod** module for the virtual web camera on all nodes
 - Run the sagewebcam script 
-- Run SAGE2 application **local_webcam** showing the webcam output
+- Run the SAGE2 application **local_webcam** to show the web camera output
 
+
+Running the sagewebcam script:
 
 ```bash
 sagewebcam /storage/VIDEO.mp4
 ```
 
-Configures virtual cameras on all ndoes, starts receivers, opens video and streams it to all nodes. 
-If the video is in h264, then it's simply streamed as is (this can be disabled by parameter -e/--encode). Otherwise it's decoded, encoded into h264 and streamed. Note: not every h264 file is encoded for streaming. In a case of problems, add the -e and try it again with reencoded stream.
+This script configures the virtual cameras on all nodes, starts receivers, opens a video source and streams it to all nodes.
 
-There are several parameters that change the bahaviour:
-- -s/--streamer - Sets the underlying streaming implementation. Default value is 'yuri'. If you have libyuri compiled with ultragrid support, you can also try 'uv' as an alternative.
-- -a/--alternative - Use alternative addresses (in a case main interface has bad properties)
-- -d/--decklink - Use decklink capture card. The filename should be se to a valid decklink format (eg 1080p25)
-- -l/--log - Saves output to log files (/tmp/sgewebcam*)
+There are several parameters that change the behaviour:
+- -s/--streamer -  Sets the external streaming software. The values can be 'uv' for Ultragrid and ‘yuri’ as an alternative using libyuri internal streaming routines.
+- -a/--alternative - Use alternative addresses (in case of networking problems on the main network interface)
+- -d/--decklink - Use a Decklink capture card. The filename should be set to a valid Decklink format (eg., 1080p25)
+- -l/--log - Saves the output to log files (/tmp/sagewebcam*)
 - -m/--mtu - Specifies mtu
+- -e/--encode – If the input video is stored in a H.264 encoded file, stream it as it is, without decoding and encoding it again
 
+The virtual web cameras are automatically created by the **sagewebcam** script exactly for the resolution of the input video. The same virtual web cameras can be used repeatedly for streaming of multiple video sources, as long as the resolution does not change. If you change resolution of the input video, it is necessary to stop all Chrome/Electron web browsers of the SAGE2 before running the **sagewebcam** script and start all Chrome/Electron web browsers afterwards. Otherwise the web browsers hold the virtual web cameras open and they cannot be re-created by the **sagewebcam** script.
 
-## 3. WebRTC
+## 3. Network streaming of video to SAGE2 software using WebRTC
 
-#### Expected setup
-Server with virtual webcamera and browser (chrome). The server has to have **vcmod** module loaded.
+#### Setup:
+The sender side uses a virtual web camera and a web browser (Chrome), which takes video from the virtual web camera and streams it to all web browsers of SAGE2. The sender side PC must have the **vcmod** module loaded.
 
-#### Installing
-Before installing sage2 application, change the address of websocket server in the sage_webrtc.js to address of **server**.
-On the server side, run 
+#### Installation:
+Set the address of the sender in the sage_webrtc.js script. 
+
+On the sender, in the *webrtc* directory, run:
+
 ```bash
 npm install
 ```
-in the *webrtc* directory.
 
-#### Usage
-On the **server**, firstly start the server (in webrtc directory):
+#### Usage:
+On the sender, in the *webrtc* directory run:
 ```bash
 npm run start
 ```
 
-Then run *sagewebrtc* script and access http://localhost:8800/. This should connect to virtual webcam. Now you can start the application **webrtc_test** on sage.
+On the sender, run the **sagewebrtc** script:
+
 
 ```bash
 sagewebrtc /storage/video.mp4
 ```
 
-## 4. Local webserver and JPEGs
+On the sender, start a Chrome web browser and point it to the URL http://localhost:8800
 
-#### Expected setup
-**Server** opens a file, encodes frames to JPEG and starts a webserver providing these images.
-**sage2** application then periodically takes images from the webserver.
+Now you can start the SAGE2 application**webrtc_test**, which should receive the streamed video. You can see statistics on the web page opened by the web browser on the sender.
 
+## 4. Network streaming of video to SAGE2 software using JPEGs
 
-#### Installing
-Before deploying the sage2 application, change the address of **server** in sage_jpeg.js
+#### Setup:
+The sender opens a file, encodes frames to JPEG images and starts a webserver providing them over the network. The SAGE2 application then periodically requests images from the web server and displays them.
 
-#### Usage
-- start video:
+#### Installation:
+Set the address of the sender in the **sage_jpeg.js** script.
+
+#### Usage:
+On the sender, start the **sagewebjpeg** script:
+
 ```bash
 sagewebjpeg /storage/VIDEO.mp4
 ```
-- start sage2 application **yuri_image**
 
+Now you can start the SAGE2 application **yuri_image**, which should receive the streamed video.
 
 
 
