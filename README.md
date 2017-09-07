@@ -18,9 +18,9 @@ Method 2 is the most powerful network streaming. Methods 3 and 4 are alternative
 - [nodejs](https://nodejs.org/) - for method 3.
 
 ### Gentoo linux
-An ebuild for these scripts and dependencies (mainly libyuri and virtual webcamera) is also provided as ebuild for **Gentoo Linux** in [cave_overlay](https://github.com/iimcz/cave_overlay) and there;s an overlay list XML on https://iim.cz/cave.xml.
+An ebuild for these scripts and dependencies (mainly libyuri and virtual webcamera) is also provided as ebuild for **Gentoo Linux** in [cave_overlay](https://github.com/iimcz/cave_overlay) and there is an overlay list XML on https://iim.cz/cave.xml.
 
-If you have layman installed, the you can (as root):
+If you have layman installed, then you can (as root):
 ```bash
 cd /etc/layman/overlays
 wget https://iim.cz/cave.xml
@@ -31,11 +31,11 @@ emerge -atv sage_video virtual_camera
 ### Other linux distributions
 
 When installing withou an ebuild, you should:
-1. Install dependencies (ffmpeg, libyuri, virtual webcamera, ...)
-2. install the script:
+1. Install dependencies (python, ...)
+2. install the scripts:
   - Put the scripts anywhere in your PATH
-  - create configuration file in **/etc/sage_video/config.json** (based on example python/config.json.sample)
-  - Dont't forget to specify path to *configs* directory in config.json
+  - create a configuration file in **/etc/sage_video/config.json** (based on the example python/config.json.sample)
+  - Do not forget to specify the path to the *configs* directory in config.json
 
 
 ## Configuration file
@@ -61,11 +61,11 @@ The sample configuration file looks like this:
 }
 ```
 
-- total\_x, total\_y - Resolution the the whole wall in pixels
+- total\_x, total\_y - Resolution of the whole wall in pixels
 - stripes\_x, stripes\_y - How are the PC nodes organized (not displays). For example, in our case, we have 20 displays - 4 rows and 5 columns. There are 5 PC nodes, each of them driving a single column of 4 displays. So there are 5 stripes in X axis, and only one stripe in Y axis.
 - server.dir - Directory with XML configuration files from the repository. 
 - renderers - The **nodes**. 
-  - name of each renderer is "X_Y" -  where X is the number of stripe in X axis and Y is the number of stripe in Y axis.
+  - name of each renderer is "X_Y" -  where X is the number of the stripe in the X axis and Y is the number of the stripe in the Y axis.
   - dir - directory with XML's (like server.dir)
   - address - user and address of the node. e.g. cave@192.168.2.10
   - alt_ip - alternative IP address (if you have multiple network interfaces on nodes and you want to use non-default interfaces, such as local interconnection over private IP addresses)
@@ -86,20 +86,20 @@ This solution works as a distributed player. Video is divided into stripes. Each
 
 #### How it works:
 User starts a script on the **server** and the file is then played synchronously on all the **nodes**.
-. The script also starts a webserver for controlling the playback (pause/play).
+The script also starts a webserver for controlling the playback (pause/play).
 
 Internally, it can work in two modes:
 - Direct playback - The **server** and all **nodes** accept the video file in its full resolution. The **server** sends messages to the nodes to maintain synchronization. The server can also play sound.
 - Prepared videos - The video file is first cut into stripes, one for each node. The server then plays the original video (or a scaled down version) and each node plays just its own stripe. This mode is more effective and allows to play higher resolution videos (8K).
 
 ##### Direct playback:
-Assuming that all PCs (server and nodes) have shared storage mounted on /storage:
+Assuming that all PCs (server and nodes) have shared a storage mounted on /storage:
 
 ```bash
 sagevideo /storage/VIDEO.mp4
 ```
 
-This plays a video file /storage/VIDEO.mp4 on all nodes, which have to process the full resolution video file.
+This plays a video file /storage/VIDEO.mp4 on all nodes, where each node has to process the full resolution video file.
 
 ```bash
 sagevideo -s /storage/VIDEO.mp4
@@ -120,7 +120,7 @@ sagevideo /storage/VIDEO_small.mp4 -o /storage/VIDEO
 This plays the small video file on the server and the pre-encoded stripes on nodes.
 
 #### Performance:
-On our system with 5 nodes, each driving four 1080p displays, it is possible to use the direct method for formats up to 4K30p. For higher resolutions, it is needed to prepare the video into stripes.
+In our setup with five nodes, each driving four 1080p displays, it is possible to use the direct method for formats up to 4K30p. For higher resolutions or fps, it is necessary to first prepare the video into stripes.
 
 
 ## 2. Network streaming of video to SAGE2 using a virtual web camera and external streaming software
