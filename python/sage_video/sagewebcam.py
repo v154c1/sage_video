@@ -190,8 +190,10 @@ if __name__ == '__main__':
     parser.add_argument('--bps', '-b', help='Specify BPS for encoder', dest='bps', type=int, default=-1)
     parser.add_argument('--alternative', '-a', action='store_true',
                          default=False, dest='alt_ip', help='Use alternate IP')
-    parser.add_argument('--encode', '-e', action='store_true',
-                         default=False, dest='encode', help='Force reencoding of the video, even if not needed')
+    # parser.add_argument('--encode', '-e', action='store_true',
+    #                      default=False, dest='encode', help='Force reencoding of the video, even if not needed')
+    parser.add_argument('--keep', '-k', action='store_false',
+                         default=True, dest='encode', help='Force reencoding of the video, even if not needed')
     parser.add_argument('--decklink', '-d', action='store_true',
                          default=False, dest='decklink', help='Use live input from decklink instead of a file.')
     parser.add_argument(
