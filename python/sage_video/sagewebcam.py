@@ -275,7 +275,7 @@ if __name__ == '__main__':
         nodes = nodes + inner_tpl.substitute({'IDX':idx, 'IP':get_node_ip(node, alt_ip), 'STREAMER': 'uv_rtp_sender' if use_uv else 'simple_h264_sender'})+u'\n\n'
         
         
-    oxml = main_tpl.substitute({'NODES':nodes})
+    oxml = main_tpl.substitute({'NODES':nodes, 'ENCODER':'uv_libav' if use_uv else 'x264_encoder'})
         
     # This should use mkstemp or similar, keeping the same name only for debugging. 
     xml_name = '/tmp/ox.xml'
@@ -294,7 +294,7 @@ if __name__ == '__main__':
                    '/usr/bin/yuri_simple',
                    '%s[address=0.0.0.0,fps_stats=%d]'%('uv_rtp_receiver' if use_uv else 'simple_h264_receiver', fps_stats),
                    '-punlimited',
-                   'avdecoder[fps_stats=%d]'%fps_stats,
+                   'uv_libav_decomp[format=uyvy,fps_stats=%d]'%fps_stats if use_uv else 'avdecoder[fps_stats=%d]'%fps_stats,
                    '-psingle',
                    'convert[format=%s,fps_stats=%d]'%(dev['format'],fps_stats),
                    'filedump[filename=/proc/%s]'%dev['name']
@@ -317,7 +317,8 @@ if __name__ == '__main__':
                'mtu=%d' %mtu,
                'bps=%s'%bps,
                'fps_stats=%d'%fps_stats,
-               'resolution=%dx%d'% (stream['width'], stream['height'])
+               'resolution=%dx%d'% (stream['width'], stream['height']),
+               'format=%s'%('yuyv' if use_uv else 'yuv420p')
                ]
     print(cmdline)
     if not dry:

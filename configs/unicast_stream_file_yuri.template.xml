@@ -5,6 +5,7 @@
 <variable name="fps">0</variable>
 <variable name="fps_stats">100</variable>
 <variable name="mtu">1400</variable>
+<variable name="format">yuv420p</variable>
 
 <node class="rawavsource" name="src">
         <parameter name="filename">@file</parameter>
@@ -12,10 +13,10 @@
 </node>
 
 <node class="convert" name="convert">
-        <parameter name="format">yuv420p</parameter>
+        <parameter name="format">@format</parameter>
 </node>
 
-<node class="x264_encoder" name="compress">
+<node class="${ENCODER}" name="compress">
         <parameter name="bps">@bps</parameter>
         <parameter name="fps_stats">@fps_stats</parameter>
 </node>
