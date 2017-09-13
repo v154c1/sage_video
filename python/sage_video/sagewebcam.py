@@ -94,7 +94,7 @@ def vcctrl_check_list(out):
 def vcctrl_get_list(out):
     devs = []
     for line in out[1:]:
-        res = re.search('^(\d+)\. (vcfb\d+)\((\d+),(\d+),([a-z]+)\) -> (/dev.*)$', line)
+        res = re.search('^(\d+)\. (vcfb\d+)\((\d+),(\d+),([a-z0-9_-]+)\) -> (/dev.*)$', line)
         devs.append({
             'index':res.group(1),
             'name':res.group(2),
