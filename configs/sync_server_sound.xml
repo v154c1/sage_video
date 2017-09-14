@@ -7,6 +7,7 @@
 <variable name="websize" description="Web port">320x240</variable>
 <variable name="webfps" description="Web fps">10</variable>
 <variable name="format" description="Output format"></variable>
+<variable name="loop" description="Loop the video">FALSE</variable>
 
 <variable name="channels" description="Number of output channels">6</variable>
 <variable name="name" description="JACK client name">sage_video</variable>
@@ -15,6 +16,7 @@
 	<parameter name="filename">@file</parameter>
 	<parameter name="max_audio">1</parameter>
 	<parameter name="audio_sample_rate">48000</parameter>
+	<parameter name="loop">@loop</parameter>
 </node>
 
 <node class="onepc_protocol_coordinator" name="sync">

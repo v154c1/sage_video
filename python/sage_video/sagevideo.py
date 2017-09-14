@@ -153,7 +153,7 @@ def cut(cfg, filename, out_prefix, dry):
         if not dry:
             subprocess.call(cmdline)
 
-def play(cfg, video_file, out_prefix, sound, format, dry):
+def play(cfg, video_file, out_prefix, sound, format, dry, loop):
     client_cfg = CLIENT_CFG_FILE if out_prefix else CLIENT_CFG_FILE_PAD
     server_cfg = SERVER_CFG_FILE_SOUND if sound else SERVER_CFG_FILE
 
@@ -240,7 +240,8 @@ def play(cfg, video_file, out_prefix, sound, format, dry):
                 tmp_name, 
                 'file=' + video_file, 
                 'webdir=' + os.path.join(sdir, 'webcontroller'), 
-                'format=%s' % format]
+                'format=%s' % format, 
+                'loop=%s'%('TRUE' if loop else 'FALSE')]
     print('Server cmdline: %s' % str(cmdline))
     if not dry:
         yuri_server = subprocess.Popen(cmdline)
@@ -280,6 +281,8 @@ if __name__ == '__main__':
                         dest='prepare', action='store_true', default=False)
     parser.add_argument('--sound', '-s', action='store_true',
                         default=False, dest='use_sound', help='Enable sound')
+    parser.add_argument('--loop', '-L', action='store_true',
+                        default=False, dest='loop', help='Loop video')
     parser.add_argument(
         '--output', '-o', help='Output file prefix', dest='out_prefix')
     parser.add_argument('--format', '-f', help='Specify format for display', dest='format', choices=[
@@ -318,4 +321,4 @@ if __name__ == '__main__':
         print ('Playing video %s sound, using conversion to %s' %
                ('with' if args.use_sound else 'without', args.format))
         play(cfg, args.video_file, args.out_prefix,
-             args.use_sound, args.format, args.dry_run)
+             args.use_sound, args.format, args.dry_run, args.loop)
