@@ -1,7 +1,6 @@
 <app>
 
 <variable name="file" description="Video file"></variable>
-<variable name="address" description="target address">239.0.0.1</variable>
 <variable name="port" description="target port">20103</variable>
 <variable name="webdir" description="Directory with web"></variable>
 <variable name="webport" description="Web port">9080</variable>
@@ -18,11 +17,6 @@
 </node>
 
 <node class="event_info" name="info"/>
-
-<node class="osc_sender" name="osc_out">
-		<parameter name="address">@address</parameter>
-		<parameter name="port">@port</parameter>
-</node>
 
 <node class="osc_sender" name="osc_out1">
 		<parameter name="address">195.113.232.41</parameter>
@@ -86,7 +80,6 @@
  -->
  
 <event>
-route(sync:perform)->osc_out:/perform;
 route(sync:perform)->osc_out1:/perform;
 route(sync:perform)->osc_out2:/perform;
 route(sync:perform)->osc_out3:/perform;
