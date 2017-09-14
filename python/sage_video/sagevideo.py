@@ -11,6 +11,8 @@ import argparse
 import os.path
 import sys
 import time
+import tempfile
+from string import Template
 
 INSTALL_DIR = "/etc/sage_video"
 
@@ -171,7 +173,14 @@ def play(cfg, video_file, out_prefix, sound, format, dry):
     part_height = cfg['part_height']
 
     instances = []
+    sender_node_tpl = Template('''<node class="osc_sender" name="osc_out${idx}">
+		<parameter name="address">${address}</parameter>
+		<parameter name="port">@port</parameter>
+        </node>''')
+    sender_route_tpl = Template('route(sync:perform)->osc_out${idx}:/perform;')
 
+    sender_nodes = []
+    sender_routes = []
     dev_null = subprocess.DEVNULL if 'DEVNULL' in subprocess.__all__ else open(
         os.devnull, 'wb')
     print(dev_null)
@@ -211,10 +220,27 @@ def play(cfg, video_file, out_prefix, sound, format, dry):
             p = subprocess.Popen(cmdline, stdout=dev_null, stderr=dev_null)
             instances.append(p)
             time.sleep(0.5)
+            addr_tmp = renderer['address'].split('@')
+            addr=addr_tmp[len(addr_tmp) - 1]
+            sender_nodes.append(sender_node_tpl.substitute({'idx':tile_id, 'address': addr}))
+            sender_routes.append(sender_route_tpl.substitute({'idx':tile_id}))
 
     sdir = cfg['server']['dir']
-    cmdline = ['/usr/bin/yuri2', os.path.join(
-        sdir, server_cfg), 'file=' + video_file, 'webdir=' + os.path.join(sdir, 'webcontroller'), 'format=%s' % format]
+
+
+    main_tpl = Template(open(os.path.join(sdir, server_cfg)).read())
+
+    handle, tmp_name = tempfile.mkstemp(suffix=".xml")
+    os.close(handle)
+    file_xml = open(tmp_name, 'wt')
+    file_xml.write(main_tpl.substitute({'SENDERS': '\n'.join(sender_nodes), 'ROUTES':'\n'.join(sender_routes)}))
+    file_xml.close()
+    print('Using %s'%tmp_name)
+    cmdline = ['/usr/bin/yuri2', 
+                tmp_name, 
+                'file=' + video_file, 
+                'webdir=' + os.path.join(sdir, 'webcontroller'), 
+                'format=%s' % format]
     print('Server cmdline: %s' % str(cmdline))
     if not dry:
         yuri_server = subprocess.Popen(cmdline)

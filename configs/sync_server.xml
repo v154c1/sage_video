@@ -18,27 +18,8 @@
 
 <node class="event_info" name="info"/>
 
-<node class="osc_sender" name="osc_out1">
-		<parameter name="address">195.113.232.41</parameter>
-		<parameter name="port">@port</parameter>
-</node>
+${SENDERS}
 
-<node class="osc_sender" name="osc_out2">
-		<parameter name="address">195.113.232.42</parameter>
-		<parameter name="port">@port</parameter>
-</node>
-<node class="osc_sender" name="osc_out3">
-		<parameter name="address">195.113.232.43</parameter>
-		<parameter name="port">@port</parameter>
-</node>
-<node class="osc_sender" name="osc_out4">
-		<parameter name="address">195.113.232.44</parameter>
-		<parameter name="port">@port</parameter>
-</node>
-<node class="osc_sender" name="osc_out5">
-		<parameter name="address">195.113.232.45</parameter>
-		<parameter name="port">@port</parameter>
-</node>
 <node class="webserver" name="webserver">
 <parameter name="port">@webport</parameter>
 </node>
@@ -72,19 +53,10 @@
 
 <node class="playback_controller" name="playback">
 </node>
-<!-- 
-<node class="jack_output" name="jack">
-<parameter name="connect_to">system</parameter>
 
-</node>
- -->
  
 <event>
-route(sync:perform)->osc_out1:/perform;
-route(sync:perform)->osc_out2:/perform;
-route(sync:perform)->osc_out3:/perform;
-route(sync:perform)->osc_out4:/perform;
-route(sync:perform)->osc_out5:/perform;
+${ROUTES}
 route(control:pause)->video:pause;
 route(pass(FALSE))->video:pause;
 </event>
