@@ -41,6 +41,6 @@ route(osc_in:/perform)->sync:perform;
 	<parameter name="count">5</parameter>
 </link>
 <link class="single" name="show" source="sync:0" target="convert:0"/>
-<link class="single" name="show" source="convert:0" target="glx:0"/>
+<link class="single" name="show2" source="convert:0" target="glx:0"/>
 	
 </app>
